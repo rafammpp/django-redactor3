@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import widgets
 from django.utils.safestring import mark_safe
-from django.url import reverse_lazy
+from django.urls import reverse_lazy
 from django.conf import settings
 
 from redactor.utils import json_dumps
@@ -24,8 +24,6 @@ class RedactorEditor(widgets.Textarea):
 
         widget_attrs = {'class': 'redactor-box'}
         widget_attrs.update(kwargs.get('attrs', {}))
-        widget_attrs.update({'data-redactor-options': self.options})
-
         kwargs['attrs'] = widget_attrs
         super(RedactorEditor, self).__init__(*args, **kwargs)
 
@@ -35,17 +33,16 @@ class RedactorEditor(widgets.Textarea):
         Because at some point Django calls RedactorEditor.__init__ before
         loading the urls, and it will break.
         """
-        attrs['data-redactor-options'] = json_dumps(self.options)
+        
         html = super(RedactorEditor, self).render(name, value, attrs)
+        final_attrs = self.build_attrs(attrs)
+        id_ = final_attrs.get('id')
+        html += f"<script>$R('#{id_}', {self.options});</script>"
         return mark_safe(html)
 
     def _media(self):
         _min = '' if settings.DEBUG else '.min'
-        js = (
-            'redactor/jquery.redactor.init.js',
-            'redactor/redactor{}.js'.format(_min),
-            'redactor/langs/{}.js'.format(self.options.get('lang', 'en')),
-        )
+        js = ('redactor/redactor{}.js'.format(_min),)
 
         if 'plugins' in self.options:
             plugins = self.options.get('plugins')
@@ -57,7 +54,6 @@ class RedactorEditor(widgets.Textarea):
         css = {
             'all': (
                 'redactor/redactor{}.css'.format(_min),
-                'redactor/django_admin.css',
             )
         }
         return forms.Media(css=css, js=js)
