@@ -7,6 +7,13 @@ example:
 REDACTOR_OPTIONS = {}
 REDACTOR_OPTIONS['fileUpload'] = 'uploads/'
 
+Note:
+Boolean values must be quoted (this fix compatibility errors with js booleans values). Like this:
+```Python
+class Article(models.Model):
+	title = RedactorField(redactor_options={'pastePlainText': 'true', 'linebreaks': 'True'})
+```
+
 ### Other django-side settings with default values:
 
 REDACTOR_FILE_STORAGE = 'django.core.files.storage.DefaultStorage'
