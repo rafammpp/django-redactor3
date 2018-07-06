@@ -47,6 +47,18 @@ class RedactorUploadView(FormView):
         return super(RedactorUploadView, self).dispatch(request,
                                                         *args, **kwargs)
 
+    def get_form(self, form_class=None):
+        """Return an instance of the form to be used in this view."""
+        if form_class is None:
+            form_class = self.get_form_class()
+        kwargs = self.get_form_kwargs()
+
+        # there is a bug in redactor3, it appends '[]' to fieldname
+        if 'files' in kwargs and 'file[]' in kwargs['files']:
+            kwargs['files']['file'] = kwargs['files']['file[]']
+
+        return form_class(**kwargs)
+
     def form_invalid(self, form):
         # TODO: Needs better error messages
         try:
@@ -66,5 +78,10 @@ class RedactorUploadView(FormView):
         file_name = force_str(uploader.get_filename())
         file_url = force_str(uploader.get_url())
         file_name_key = 'id' if self.form_class is ImageForm else 'name'
-        data = {'url': file_url, file_name_key: file_name}
+        data = {
+                    'file' : {
+                        'url': file_url,
+                        'id': file_name
+                    }
+                }
         return HttpResponse(json.dumps(data), content_type='application/json')
