@@ -37,7 +37,7 @@ class RedactorEditor(widgets.Textarea):
         html = super(RedactorEditor, self).render(name, value, attrs, renderer, **kwargs)
         final_attrs = self.build_attrs(attrs)
         id_ = final_attrs.get('id')
-        html += f"<script>$R('#{id_}', {self.options});</script>"
+        html += f"<script>var redactor_instance = $R('#{id_}', {self.options});</script>"
         return mark_safe(html)
 
     def _media(self):
