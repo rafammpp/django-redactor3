@@ -1,6 +1,6 @@
 import json
 from django.conf import settings
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from django.views.generic import FormView
 from django.contrib.admin.views.decorators import staff_member_required
